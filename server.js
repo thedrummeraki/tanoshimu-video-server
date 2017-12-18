@@ -5,6 +5,7 @@ const app = express();
 
 const defaultVideoPath = "./assets/anime-404-not-found.mp4";
 const defaultImagePath = "./assets/anime-404-not-found.jpg";
+const defaultSubtitlesFormat = 'vtt';
 
 var defaultPath = process.env.TANOSHIMU_PATH;
 if (!defaultPath) {
@@ -25,6 +26,8 @@ app.use(express.static(path.join(__dirname, 'public')));
   requested resource (if found) in image/video format. If the image was
   not found, a 404 image will be returned. If the video was not found,
   a 404 anime video will be returned.
+
+  Subtitles will also be supported.
 */
 app.get('/videos', function(req, res) {
   // Get the query parameters if any
@@ -36,17 +39,28 @@ app.get('/videos', function(req, res) {
   var episode = query.episode || query.episode_number;
   var format = query.format;
   var show_icon = query.show_icon;
+  var subtitle = query.subtitle || 'false';
   var solid = query.solid || 'false';
 
   // Check if a video is requested and set the default path accordingly
   video = video == "true";
   solid = solid == "true";
+  subtitle = subtitle == 'true';
   var path = video ? defaultVideoPath : defaultImagePath;
 
   // Check and set the default format (jpg for images, mp4 for videos)
   // This format will be used for the finding the image/video file and
-  // used for the response header.
-  format = !format ? ((video ? "mp4" : "jpg")) : format;
+  // used for the response header. For subtitles, web vtt is going to
+  // be the default format.
+  if (subtitle) {
+    // ignore the format for subtitles.
+    if (format) {
+      warn('Requested subtitles. Ignoring format ' + format + ' in favour of WebVTT.');
+    }
+    format = defaultSubtitlesFormat;
+  } else {
+    format = !format ? ((video ? "mp4" : "jpg")) : format;
+  }
   
   // If an episode within a show has been requested
   if (show && episode) {
@@ -59,7 +73,7 @@ app.get('/videos', function(req, res) {
       }
     } catch (e) {
       // If parsing was not successful
-      console.error(e);
+      error(e);
       success = false;
     }
 
@@ -93,7 +107,9 @@ app.get('/videos', function(req, res) {
 
   // Determine the content type to return the server response
   var contentType;
-  if (!video) {
+  if (subtitle) {
+    contentType = "text/plain";
+  } else if (!video) {
     // If an image is requested
     contentType = "image/";
 
