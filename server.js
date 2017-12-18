@@ -8,13 +8,13 @@ const defaultImagePath = "./assets/anime-404-not-found.jpg";
 
 var defaultPath = process.env.TANOSHIMU_PATH;
 if (!defaultPath) {
-  console.warn("Environment variable TANOSHIMU_PATH not set...");
+  warn("Environment variable TANOSHIMU_PATH not set...");
   defaultPath = "/videos";
 }
 if (!defaultPath.endsWith("/")) {
   defaultPath = defaultPath.concat("/");
 }
-console.log("Serving tanoshimu files at: %s", defaultPath);
+log("Serving tanoshimu files at: %s", defaultPath);
 
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -68,7 +68,7 @@ app.get('/videos', function(req, res) {
   }
 
   // Show the path for debugging
-  console.log(path);
+  log(path);
 
   // If the file does not exist, get the default image/video filename.
   if (!fs.existsSync(path)) {
@@ -137,16 +137,33 @@ const port = process.env.PORT || 3000;
 
 app.listen(port, function () {
   if (!process.env.PORT) {
-    console.warn("You can set the environment variable PORT to start the app on a specific port!");
+    warn("You can set the environment variable PORT to start the app on a specific port!");
   }
-  console.log('Listening on port %s!', port);
+  log('Listening on port %s!', port);
 });
 
-function log(log_function, message) {
-  var log_function_name = log_function.toString();
-  log_function_name = log_function_name.substr('function '.length);
-  log_function_name = log_function_name.substr(0, log_function_name.indexOf('('));
-  log_function("[%s]: %s", log_function_name, message);
+function log(message) {
+  var func = console.log;
+  debug("INFO", func, message);
+}
+
+function warn(message) {
+  var func = console.log;
+  debug("WARNING", func, message);
+}
+
+function error(message) {
+  var func = console.error;
+  debug("ERROR", func, message);
+}
+
+function fatal(message) {
+  var func = console.error;
+  debug("FaTaL!", func, message);
+}
+
+function debug(key, log_function, message) {
+  log_function("[%s]: %s", key, message);
 }
 
 
