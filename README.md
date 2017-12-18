@@ -2,27 +2,42 @@
 ### 楽しむ (lit. To have fun)
 <a href="https://tanoshimu.herokuapp.com"><img src="public/favicon.ico" width="100" height="100"/></a>
 
-#### What is it?
+## What is it?
+
 This is the repository responsible for delivering content to my streaming application [https://tanoshimu.herokuapp.com](https://tanoshimu.herokuapp.com). Check out a live demo 
 [here](https://akinyele.herokuapp.com/#tanoshimu) on my website!
 
-#### How can I use it?
+## How can I see it?
+
 I don't publish to link to the real video server for privacy and copyright reasons. The best way to see how it works is to clone this repository and run it.
 
-#### Technologies
+## Technologies
+
 The following technologies made this app into what it is today:
 - [Node.js](https://nodejs.org/) (Server-side and API development)
 - _and more to come!_
 
-#### How do I contribute or check out the project?
+## How do I contribute? How do I use the project?
+
 This is a Node.js application, so you will have to have *node* installed.
-Once you have your development environment set up, simply run:
+Once you have your development environment set up, make sure you have `/videos` created:
+```
+$ sudo mkdir /videos
+$ sudo chowm -R tanoshimu-user:tanoshimu-user /videos
+```
+Of course, replace `tanoshimu-user` with your real username.
+
+Now you can clone and start the project:
 ```
 $ git clone git@github.com:/thedrummeraki/tanoshimu-video-server.git
 $ cd tanoshimu-video-server
 $ npm start
 ```
-Once the server is running, you can go to http://localhost:8014. Feel free to play around with `server.js`. You can reference real video files on your computer (that's what it's for). **By default, this will look for videos under the folder `/videos`.** Example:
+Once the server is running, you can go to http://localhost:8014. Feel free to play around with `server.js`.
+
+## Some examples
+
+You can reference real video files on your computer (that's what it's for). **By default, this will look for videos under the folder `/videos`.** Example:
 
 You have an anime show name "Fairy Tail" and all its episodes are located within the folder "fairy-tail". All episodes are in "m4a" format. Here are a few examples of endpoints to hit:
 
@@ -53,10 +68,16 @@ http://localhost:3000/videos?show_icon=fairy_tail_banner&&format=ico&under=other
 
 More endpoints will be added!
 
-#### 404 erros
+## Can I use it for my project?
+
+You there is a license. If you're okay with it, you can use this in your project accordingly.
+
+## About 404 errors in this application
+
 This is (I think) the most interesting thing about this video server. This server returns a 404 image or a 404 video (if `video=true` is specified). Obviously, the actual status returned will be 200. This was made in such a way that there is always something returned by the server.
 
-### About Tanoshimu
+## About Tanoshimu
+
 This project was originally called *My Akinyele* and was running Rails 4. The UI and the code design 
 were terrible so I decided to change everything in January 2017 for the best. A big change was the use of
 Slim and the heavy use of Bootstrap (as well as better overall code architecture).
