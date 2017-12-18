@@ -31,6 +31,7 @@ Now you can clone and start the project:
 ```
 $ git clone git@github.com:/thedrummeraki/tanoshimu-video-server.git
 $ cd tanoshimu-video-server
+$ npm i
 $ npm start
 ```
 Once the server is running, you can go to http://localhost:8014. Feel free to play around with `server.js`.
