@@ -39,7 +39,7 @@ app.get('/videos', function(req, res) {
   var episode = query.episode || query.episode_number;
   var format = query.format;
   var show_icon = query.show_icon;
-  var subtitle = query.subtitle || 'false';
+  var subtitle = query.subtitle || query.subtitles || 'false';
   var solid = query.solid || 'false';
 
   // Check if a video is requested and set the default path accordingly
