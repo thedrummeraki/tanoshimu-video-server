@@ -14,24 +14,33 @@ if (!defaultPath) {
 if (!defaultPath.endsWith("/")) {
   defaultPath = defaultPath.concat("/");
 }
-log("Serving tanoshimu files at: %s", defaultPath);
+log("Serving tanoshimu files at: " + defaultPath);
 
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+/**
+  The route for all videos. It includes formats for images too because
+  Tanoshimu requires both videos and images. Will return the actual
+  requested resource (if found) in image/video format. If the image was
+  not found, a 404 image will be returned. If the video was not found,
+  a 404 anime video will be returned.
+*/
 app.get('/videos', function(req, res) {
   // Get the query parameters if any
   var query = req.query;
 
   // Get the query params values
   var video = query.video || 'false';
-  var show = query.show;
-  var episode = query.episode;
+  var show = query.show || query.shows;
+  var episode = query.episode || query.episode_number;
   var format = query.format;
   var show_icon = query.show_icon;
+  var solid = query.solid || 'false';
 
   // Check if a video is requested and set the default path accordingly
   video = video == "true";
+  solid = solid == "true";
   var path = video ? defaultVideoPath : defaultImagePath;
 
   // Check and set the default format (jpg for images, mp4 for videos)
@@ -81,7 +90,7 @@ app.get('/videos', function(req, res) {
 
   // Get the file size
   const fileSize = stat.size;
-  
+
   // Determine the content type to return the server response
   var contentType;
   if (!video) {
@@ -105,14 +114,43 @@ app.get('/videos', function(req, res) {
     'Content-Type': contentType
   };
 
-  // Set the response as HTTP 200 (even if the video/image was not found).
+  // Check if a range is specified
+  const rangeRequested = !solid && req.headers.range;
+  var file;
+
+  if (rangeRequested) {
+    // Get the requested range
+    const range = req.headers.range;
+
+    // Format the range into parts to get the start and end from the video
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize-1;
+    const chunkSize = (end-start) + 1;
+
+    // Set the response header accordingly
+    head['Content-Range'] = `bytes ${start}-${end}/${fileSize}`;
+    head['Accept-Ranges'] = 'bytes';
+
+    // Get the file in chunks
+    file = fs.createReadStream(path, {start, end});
+  } else {
+    // No range request here, so get the file as a whole.
+    file = fs.createReadStream(path);
+  }
+
+  // The HTTP status will be 206 if a range was requested, 200 otherwise. See
+  // below for more info.
+  const httpStatus = rangeRequested ? 206 : 200;
+
+  // Set the response as HTTP 200/206 (even if the video/image was not found).
   // In the event that the image or a video was not found, a default file will
   // be returned. Since a valid resource is returned either, a status of 200
   // must be sent back, otherwise the client will most likely be confused.
-  res.writeHead(200, head);
+  res.writeHead(httpStatus, head);
 
   // Send the actual file while piping it to the response object.
-  fs.createReadStream(path).pipe(res);
+  file.pipe(res);
 });
 
 /**
@@ -123,7 +161,7 @@ app.get('/videos', function(req, res) {
   image.
 */
 app.use(function(req, res, next) {
-
+  error("404: " + req.url + " not found");
   const path = defaultImagePath;
   const stat = fs.statSync(path);
   const fileSize = stat.size;
@@ -139,7 +177,7 @@ app.listen(port, function () {
   if (!process.env.PORT) {
     warn("You can set the environment variable PORT to start the app on a specific port!");
   }
-  log('Listening on port %s!', port);
+  log('Listening on port ' + port + "!");
 });
 
 function log(message) {
