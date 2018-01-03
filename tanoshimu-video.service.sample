@@ -1,0 +1,13 @@
+[Unit]
+Description=Tanoshimu Video Server
+
+[Service]
+ExecStart=/usr/bin/node /path/to/tanoshimu-video-server-git-repo/server.js
+Restart=always
+User=YOUR_USERNAME
+Group=YOUR_GROUP
+Environment=NODE_ENV=production TANOSHIMU_VIDEOS_PATH=/path/to/videos PORT=8888
+WorkingDirectory=/path/to/tanoshimu-video-server-git-repo
+
+[Install]
+WantedBy=multi-user.target
