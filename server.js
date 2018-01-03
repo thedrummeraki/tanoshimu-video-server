@@ -165,6 +165,8 @@ app.get('/videos', function(req, res) {
   // must be sent back, otherwise the client will most likely be confused.
   res.writeHead(httpStatus, head);
 
+  http_status(httpStatus, "for file ".concat(path));
+
   // Send the actual file while piping it to the response object.
   file.pipe(res);
 });
@@ -184,6 +186,7 @@ app.use(function(req, res, next) {
     
   const head = {'Content-Length': fileSize, 'Content-Type': 'image/jpg'};
   res.writeHead(200, head);
+  http_status("404");
   fs.createReadStream(path).pipe(res);
 });
 
@@ -214,6 +217,15 @@ function error(message) {
 function fatal(message) {
   var func = console.error;
   debug("FaTaL!", func, message);
+}
+
+function http_status(code, message) {
+  var func = console.warn;
+  var http_message = "Returned code " + code;
+  if (message !== undefined) {
+     http_message = http_message.concat(" - ").concat(message);
+  }
+  debug("HTTP", func, http_message);
 }
 
 function debug(key, log_function, message) {
