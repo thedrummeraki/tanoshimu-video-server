@@ -1,12 +1,13 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const app = express();
+this.express = require('express');
+var fs = require('fs');
+var path = require('path');
+this.app = this.express();
 
 const defaultVideoPath = "./assets/anime-404-not-found.mp4";
 const defaultImagePath = "./assets/anime-404-not-found.jpg";
 const defaultSubtitlesFormat = 'vtt';
 
+var regularPath = process.env.ENABLE_REGULAR_PATH == 'true';
 var defaultPath = process.env.TANOSHIMU_PATH;
 if (!defaultPath) {
   warn("Environment variable TANOSHIMU_PATH not set...");
@@ -16,9 +17,12 @@ if (!defaultPath.endsWith("/")) {
   defaultPath = defaultPath.concat("/");
 }
 log("Serving tanoshimu files at: " + defaultPath);
-
-
-app.use(express.static(path.join(__dirname, 'public')));
+if (regularPath || true) {
+  log("Using regular set of paths...");
+  this.app.use('/videos', this.express.static(path.join(__dirname, 'public')));
+} else {
+  this.app.use(this.express.static(path.join(__dirname, 'public')));
+}
 
 /**
   The route for all videos. It includes formats for images too because
@@ -29,7 +33,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
   Subtitles will also be supported.
 */
-app.get('/videos', function(req, res) {
+this.app.get('/get/videos', function(req, res) {
   // Get the query parameters if any
   var query = req.query;
 
@@ -178,7 +182,7 @@ app.get('/videos', function(req, res) {
   returned and that the client can properly handle and even render the received
   image.
 */
-app.use(function(req, res, next) {
+this.app.use(function(req, res, next) {
   error("404: " + req.url + " not found");
   const path = defaultImagePath;
   const stat = fs.statSync(path);
@@ -192,12 +196,34 @@ app.use(function(req, res, next) {
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, function () {
-  if (!process.env.PORT) {
-    warn("You can set the environment variable PORT to start the app on a specific port!");
-  }
-  log('Listening on port ' + port + "!");
+//app.listen(port, function () {
+//  if (!process.env.PORT) {
+//    warn("You can set the environment variable PORT to start the app on a specific port!");
+//  }
+//  log('Listening on port ' + port + "!");
+//});
+
+var https = require('https');
+var http = require('http');
+const sslPath = '/etc/letsencrypt/live/tanoshimu.akinyele.ca/';
+var sslOptions = {
+    key: fs.readFileSync(sslPath + 'privkey.pem'),
+    cert: fs.readFileSync(sslPath + 'fullchain.pem')
+};
+
+this.server = https.createServer(sslOptions, this.app);
+this.app.get('*', function(req, res) {  
+    res.redirect('https://' + req.headers.host + req.url);
 });
+this.server.listen(443);
+log('Listening on https port!');
+
+var http = require('http');
+http.createServer(function (req, res) {
+    res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
+    res.end();
+}).listen(80);
+
 
 function log(message) {
   var func = console.log;
