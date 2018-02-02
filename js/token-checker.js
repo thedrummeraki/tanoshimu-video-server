@@ -3,6 +3,8 @@ var fs = require('fs');
 var logging = require('./logging');
 var config = require('../tanoshimu-config');
 
+logging.log("Setting up token checker...");
+
 function tokenChecker(req, res, next) {
     console.log(req.query);
     console.log(req.url.startsWith('/error'));
@@ -61,4 +63,5 @@ function talkToTanoshimu(path, res, next) {
     https_req.end();
 }
 
+logging.log("Token checker was setup");
 module.exports = tokenChecker;

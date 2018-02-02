@@ -5,8 +5,8 @@ var config = require('../tanoshimu-config');
 var tokenChecker = require('./token-checker');
 var app = express();
 
-app.use('/videos', express.static(config.defaultPath));
 app.use(tokenChecker);
+app.use('/videos', express.static(config.defaultPath));
 logging.log('All files are statically served on ' + config.defaultPath);
 
 module.exports = app;
