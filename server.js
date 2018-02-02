@@ -14,6 +14,20 @@ try {
     return;
 }
 
+this.app.get('/error', function(req, res) {
+    logging.error('Redirecting from error! ' + req.query.message);
+    const path = config.defaultErrorImagePath;
+    const stat = fs.statSync(path);
+    const fileSize = stat.size;
+
+    console.log(path);
+    
+    const head = {'Content-Length': fileSize, 'Content-Type': 'image/jpg'};
+    res.writeHead(200, head);
+    logging.http_status(req.query.http_status || "500");
+    fs.createReadStream(path).pipe(res);
+});
+
 this.app.use(function(req, res, next) {
     logging.error("404: " + req.url + " not found");
     const path = config.defaultImagePath;

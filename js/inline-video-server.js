@@ -1,11 +1,13 @@
 var fs = require('fs');
 var logging = require('./logging');
 var config = require('../tanoshimu-config');
+var tokenChecker = require('./token-checker');
 var express = require('express');
 var path = require('path');
 var app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(tokenChecker);
 
 app.get('/videos', function(req, res) {
   // Get the query parameters if any
