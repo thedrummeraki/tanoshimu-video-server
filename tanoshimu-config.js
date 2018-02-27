@@ -1,4 +1,7 @@
 var ssl_domain = process.env.TANOSHIMU_DOMAIN || "test.com";
+if (!ssl_domain.endsWith('/')) {
+    ssl_domain = ssl_domain.concat('/');
+}
 
 module.exports = {
     defaultVideoPath: "./assets/anime-404-not-found.mp4",
