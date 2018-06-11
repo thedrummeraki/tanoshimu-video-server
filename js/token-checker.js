@@ -42,7 +42,7 @@ function talkToTanoshimu(path, res, next) {
         }
     }
     var options = {
-        hostname: 'tanoshimu.herokuapp.com',
+        hostname: 'anime.akinyele.ca',
         path: path,
         method: 'POST'
     };
